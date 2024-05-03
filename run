@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-rm main
+rm crn
 
-gcc -std=c2x -Wall -pedantic main.c -o main
+gcc -std=c2x -Wall -pedantic main.c -o crn
 
-./main
+./crn
