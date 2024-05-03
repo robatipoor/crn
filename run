@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+rm main
+
+gcc -std=c2x -Wall -pedantic main.c -o main
+
+./main
