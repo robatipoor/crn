@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-rm crn
+if [ -f ./crn ]; then
+    rm crn
+fi
 
 gcc -std=c2x -Wall -pedantic main.c -o crn
 
