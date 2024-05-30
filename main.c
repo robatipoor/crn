@@ -14,10 +14,13 @@ static struct option long_options[] =
         {"delimiter", required_argument, NULL, 'd'},
         {"apply", no_argument, NULL, 'a'},
         {"path", required_argument, NULL, 'p'},
+        {"version", no_argument, NULL, 'v'},
+        {"help", no_argument, NULL, 'h'},
         {NULL, 0, NULL, 0}};
 
 enum CaseType
 {
+  UNKNOWN,
   SNAKE_CASE,
   CAMEL_CASE,
   KEBAB_CASE,
@@ -27,18 +30,21 @@ enum CaseType
 int is_file(const char *path);
 void rename_filename(char *filename, char find, char replace);
 size_t list_files(const char *path, char ***list);
+void print_help_message(void);
 
 int main(int argc, char *argv[])
 {
   int c;
   opterr = 0;
   int apply_flag = 0;
-  enum CaseType case_type;
-  char path[100] = {};
+  enum CaseType case_type = UNKNOWN;
+  char path[200] = {};
   char delimiter = 0;
   int d_flag = 0;
 
-  while ((c = getopt_long(argc, argv, "ac:d:p:", long_options, NULL)) != -1)
+  printf("%d \n", case_type);
+
+  while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
     switch (c)
     {
     case 'c':
@@ -75,28 +81,42 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Invalid -d argument \n");
         exit(EXIT_FAILURE);
       }
-
       break;
     case 'a':
       apply_flag = 1;
       break;
     case 'p':
-      // memset(path, 0, sizeof(path));
       strlcpy(path, optarg, sizeof(path));
+      path[strcspn(path, "\n")] = 0;
+      if (access(path, F_OK) == -1)
+      {
+        fprintf(stderr, "Invalid file system path: %s\n", path);
+        exit(EXIT_FAILURE);
+      }
       break;
     case 'h':
-      printf("crn help message \n");
+      print_help_message();
       exit(EXIT_SUCCESS);
     case 'v':
       printf("0.0.1v \n");
       exit(EXIT_SUCCESS);
     case '?':
-      printf("help \n");
+      printf("Unknown option: %c\n", optopt);
+      print_help_message();
       exit(EXIT_SUCCESS);
     default:
-      printf("crn help message... %c \n", c);
+      print_help_message();
       exit(EXIT_FAILURE);
     }
+
+  if (path[0] == '\0' || case_type == 0)
+  {
+    print_help_message();
+    exit(EXIT_FAILURE);
+  }
+
+  printf("%s \n", path);
+  printf("%d \n", case_type);
 
   return 0;
 }
@@ -153,4 +173,12 @@ int is_file(const char *path)
   struct stat s;
   stat(path, &s);
   return S_ISREG(s.st_mode);
+}
+
+void print_help_message(void)
+{
+    printf("Usage: crm [options]\n");
+    printf("Options:\n");
+    printf("  -h, --help     Display this help message\n");
+    printf("  -v, --version  Display version information\n");
 }

@@ -1,0 +1,24 @@
+# Ignore object files and executables
+*.o
+*.out
+
+# Ignore compiled binaries
+bin/
+
+# Ignore build directories
+build/
+
+# Ignore editor backup files
+*~
+
+# Ignore generated files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ignore dependency files
+*.d
+
+# Ignore any files in the "tmp" directory
+tmp/

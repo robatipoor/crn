@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
-if [ -f ./crn ]; then
-    rm crn
+if [ ! -d "./bin" ]; then
+    mkdir ./bin
 fi
 
-gcc -std=c2x -Wall -pedantic main.c -o crn
+if [ -f ./bin/crn ]; then
+    rm ./bin/crn
+fi
 
-./crn
+gcc -std=c2x -Wall -pedantic main.c -o ./bin/crn
+
+./bin/crn
