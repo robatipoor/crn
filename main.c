@@ -36,96 +36,98 @@ void print_help_message(void);
 
 int main(int argc, char *argv[])
 {
-  int c;
-  opterr = 0;
-  int apply_flag = 0;
-  enum CaseType case_type = UNKNOWN;
-  char path[200] = {};
-  path_state p_state = -1;
-  char ***list_file;
-  char delimiter = 0;
-  int d_flag = 0;
+  // int c;
+  // opterr = 0;
+  // int apply_flag = 0;
+  // enum CaseType case_type = UNKNOWN;
+  // char path[200] = {};
+  // path_state p_state = -1;
+  // char ***files;
+  // char delimiter = 0;
+  // int d_flag = 0;
 
-  while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
-    switch (c)
-    {
-    case 'c':
-      if (strstr(optarg, "snake"))
-      {
-        case_type = SNAKE_CASE;
-      }
-      else if (strstr(optarg, "kebab"))
-      {
-        case_type = KEBAB_CASE;
-      }
-      else if (strstr(optarg, "camel"))
-      {
-        case_type = CAMEL_CASE;
-      }
-      else if (strstr(optarg, "pascal"))
-      {
-        case_type = PASCAL_CASE;
-      }
-      else
-      {
-        fprintf(stderr, "Invalid -c argument \n");
-        exit(EXIT_FAILURE);
-      }
-      break;
-    case 'd':
-      if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0)
-      {
-        delimiter = optarg[0];
-        d_flag = 1;
-      }
-      else
-      {
-        fprintf(stderr, "Invalid -d argument \n");
-        exit(EXIT_FAILURE);
-      }
-      break;
-    case 'a':
-      apply_flag = 1;
-      break;
-    case 'p':
-      strlcpy(path, optarg, sizeof(path));
-      path[strcspn(path, "\n")] = 0;
-      p_state = check_path(path);
-      if (p_state == -1)
-      {
-        fprintf(stderr, "Invalid file system path: %s\n", path);
-        exit(EXIT_FAILURE);
-      }
-      break;
-    case 'h':
-      print_help_message();
-      exit(EXIT_SUCCESS);
-    case 'v':
-      printf("0.0.1v \n");
-      exit(EXIT_SUCCESS);
-    case '?':
-      printf("Unknown option: %c\n", optopt);
-      print_help_message();
-      exit(EXIT_SUCCESS);
-    default:
-      print_help_message();
-      exit(EXIT_FAILURE);
-    }
+  // while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
+  //   switch (c)
+  //   {
+  //   case 'c':
+  //     if (strstr(optarg, "snake"))
+  //     {
+  //       case_type = SNAKE_CASE;
+  //     }
+  //     else if (strstr(optarg, "kebab"))
+  //     {
+  //       case_type = KEBAB_CASE;
+  //     }
+  //     else if (strstr(optarg, "camel"))
+  //     {
+  //       case_type = CAMEL_CASE;
+  //     }
+  //     else if (strstr(optarg, "pascal"))
+  //     {
+  //       case_type = PASCAL_CASE;
+  //     }
+  //     else
+  //     {
+  //       fprintf(stderr, "Invalid -c argument \n");
+  //       exit(EXIT_FAILURE);
+  //     }
+  //     break;
+  //   case 'd':
+  //     if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0)
+  //     {
+  //       delimiter = optarg[0];
+  //       d_flag = 1;
+  //     }
+  //     else
+  //     {
+  //       fprintf(stderr, "Invalid -d argument \n");
+  //       exit(EXIT_FAILURE);
+  //     }
+  //     break;
+  //   case 'a':
+  //     apply_flag = 1;
+  //     break;
+  //   case 'p':
+  //     strlcpy(path, optarg, sizeof(path));
+  //     path[strcspn(path, "\n")] = 0;
+  //     p_state = check_path(path);
+  //     if (p_state == -1)
+  //     {
+  //       fprintf(stderr, "Invalid file system path: %s\n", path);
+  //       exit(EXIT_FAILURE);
+  //     }
+  //     break;
+  //   case 'h':
+  //     print_help_message();
+  //     exit(EXIT_SUCCESS);
+  //   case 'v':
+  //     printf("0.0.1v \n");
+  //     exit(EXIT_SUCCESS);
+  //   case '?':
+  //     printf("Unknown option: %c\n", optopt);
+  //     print_help_message();
+  //     exit(EXIT_SUCCESS);
+  //   default:
+  //     print_help_message();
+  //     exit(EXIT_FAILURE);
+  //   }
 
-  if (path[0] == '\0' || case_type == 0)
+  // if (path[0] == '\0' || case_type == 0)
+  // {
+  //   print_help_message();
+  //   exit(EXIT_FAILURE);
+  // }
+
+  char **files = NULL;
+  size_t files_size = list_files("./", &files);
+  for (int i = 0; i < files_size; i++)
   {
-    print_help_message();
-    exit(EXIT_FAILURE);
+    rename_filename(files[i], ' ', '_');
+    printf("%s \n", files[i]);
+    free(files[i]);
   }
+  free(files);
 
-  size_t list_size = list_files(path, list_file);
-
-  for (int i = 0; i < list_size; i++)
-  {
-    printf("%s \n", (*list_file)[i]);
-    free((*list_file)[i]);
-  }
-  free(*list_file);
   return 0;
 }
 
@@ -145,7 +147,8 @@ void rename_filename(char *filename, char find, char replace)
 
 size_t list_files(const char *path, char ***list)
 {
-  if (check_path(path) == 1)
+
+  if (check_path(path) == 0)
   {
     *list = realloc(*list, sizeof(char *));
     char *name = basename(path);
