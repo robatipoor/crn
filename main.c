@@ -8,6 +8,8 @@
 #include <ctype.h>
 #include <getopt.h>
 
+typedef int path_state;
+
 static struct option long_options[] =
     {
         {"case", required_argument, NULL, 'c'},
@@ -27,7 +29,7 @@ enum CaseType
   PASCAL_CASE,
 };
 
-int is_file(const char *path);
+path_state check_path(const char *path);
 void rename_filename(char *filename, char find, char replace);
 size_t list_files(const char *path, char ***list);
 void print_help_message(void);
@@ -39,10 +41,9 @@ int main(int argc, char *argv[])
   int apply_flag = 0;
   enum CaseType case_type = UNKNOWN;
   char path[200] = {};
+  path_state p_state = -1;
   char delimiter = 0;
   int d_flag = 0;
-
-  printf("%d \n", case_type);
 
   while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
     switch (c)
@@ -88,7 +89,8 @@ int main(int argc, char *argv[])
     case 'p':
       strlcpy(path, optarg, sizeof(path));
       path[strcspn(path, "\n")] = 0;
-      if (access(path, F_OK) == -1)
+      p_state = check_path(path);
+      if (p_state == -1)
       {
         fprintf(stderr, "Invalid file system path: %s\n", path);
         exit(EXIT_FAILURE);
@@ -115,9 +117,6 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  printf("%s \n", path);
-  printf("%d \n", case_type);
-
   return 0;
 }
 
@@ -137,7 +136,7 @@ void rename_filename(char *filename, char find, char replace)
 
 size_t list_files(const char *path, char ***list)
 {
-  if (is_file(path))
+  if (check_path(path) == 1)
   {
     *list = realloc(*list, sizeof(char *));
     char *name = basename(path);
@@ -168,17 +167,28 @@ size_t list_files(const char *path, char ***list)
   return 0;
 }
 
-int is_file(const char *path)
+int check_path(const char *path)
 {
-  struct stat s;
-  stat(path, &s);
-  return S_ISREG(s.st_mode);
+  struct stat path_stat;
+  stat(path, &path_stat);
+  if (S_ISREG(path_stat.st_mode))
+  {
+    return 0;
+  }
+  else if (S_ISDIR(path_stat.st_mode))
+  {
+    return 1;
+  }
+  else
+  {
+    return -1;
+  }
 }
 
 void print_help_message(void)
 {
-    printf("Usage: crm [options]\n");
-    printf("Options:\n");
-    printf("  -h, --help     Display this help message\n");
-    printf("  -v, --version  Display version information\n");
+  printf("Usage: crm [options]\n");
+  printf("Options:\n");
+  printf("  -h, --help     Display this help message\n");
+  printf("  -v, --version  Display version information\n");
 }
