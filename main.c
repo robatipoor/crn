@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
   enum CaseType case_type = UNKNOWN;
   char path[200] = {};
   path_state p_state = -1;
+  char ***list_file;
   char delimiter = 0;
   int d_flag = 0;
 
@@ -117,6 +118,14 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
+  size_t list_size = list_files(path, list_file);
+
+  for (int i = 0; i < list_size; i++)
+  {
+    printf("%s \n", (*list_file)[i]);
+    free((*list_file)[i]);
+  }
+  free(*list_file);
   return 0;
 }
 
@@ -189,6 +198,10 @@ void print_help_message(void)
 {
   printf("Usage: crm [options]\n");
   printf("Options:\n");
-  printf("  -h, --help     Display this help message\n");
-  printf("  -v, --version  Display version information\n");
+  printf("  -a, --apply     Apply file renaming\n");
+  printf("  -c, --case      Choose the case type (snake, camel, kebab, pascal)\n");
+  printf("  -d, --delimiter Choose the word delimiter\n");
+  printf("  -p, --path      Specify the directory or file path\n");
+  printf("  -h, --help      Display this help message\n");
+  printf("  -v, --version   Display version information\n");
 }
