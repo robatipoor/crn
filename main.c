@@ -33,6 +33,7 @@ path_state check_path(const char *path);
 void rename_filename(char *filename, char find, char replace);
 size_t list_files(const char *path, char ***list);
 void print_help_message(void);
+void rename_to_snake_case(char **filename, char find);
 
 int main(int argc, char *argv[])
 {
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
   // char path[200] = {};
   // path_state p_state = -1;
   // char ***files;
-  // char delimiter = 0;
+  // char delimiter = '\0';
   // int d_flag = 0;
 
   // while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
@@ -119,16 +120,61 @@ int main(int argc, char *argv[])
   // }
 
   char **files = NULL;
-  size_t files_size = list_files("./", &files);
+  size_t files_size = list_files("./test", &files);
   for (int i = 0; i < files_size; i++)
   {
-    rename_filename(files[i], ' ', '_');
+    rename_to_snake_case(&files[i], '\0');
     printf("%s \n", files[i]);
     free(files[i]);
   }
   free(files);
 
   return 0;
+}
+
+void rename_to_snake_case(char **filename, char find)
+{
+  if (find != '\0')
+  {
+    for (int i = 0; i < strlen(*filename); i++)
+    {
+      if ((*filename)[i] == find)
+      {
+        (*filename)[i] = '_';
+      }
+    }
+  }
+  else
+  {
+    int length = strlen(*filename);
+    int new_length = length;
+    char *out = (char *)calloc(length + 1, sizeof(char));
+    if (out == NULL)
+    {
+      perror("Failed to allocate memory");
+      return;
+    }
+    int j = 0;
+    for (int i = 0; i < length; i++)
+    {
+
+      if (isupper((*filename)[i]) && i != 0)
+      {
+        new_length++;
+        out = realloc(out, new_length);
+        if (out == NULL)
+        {
+          perror("Failed to allocate memory");
+          return;
+        }
+        out[j++] = '_';
+      }
+      out[j++] = tolower((*filename)[i]);
+    }
+    out[new_length] = '\0';
+    free(*filename);
+    *filename = out;
+  }
 }
 
 void rename_filename(char *filename, char find, char replace)
