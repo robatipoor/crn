@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "list": "c"
+        "list": "c",
+        "chrono": "c",
+        "functional": "c"
     }
 }

@@ -35,6 +35,7 @@ size_t list_files(const char *path, char ***list);
 void print_help_message(void);
 void rename_to_snake_case(char **filename, char find);
 void fs_rename(char *old_filename, char *new_filename);
+void join_paths(char *buffer, const char *path1, const char *path2);
 
 int main(int argc, char *argv[])
 {
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
   // opterr = 0;
   // int apply_flag = 0;
   // enum CaseType case_type = UNKNOWN;
-  // char path[200] = {};
+  // char path[MAX_PATH] = {};
   // path_state p_state = -1;
   // char ***files;
   // char delimiter = '\0';
@@ -121,7 +122,14 @@ int main(int argc, char *argv[])
   // }
 
   char **files = NULL;
-  size_t files_size = list_files("./test", &files);
+  char path[PATH_MAX];
+  if (realpath("~/w/crn/test", path) == NULL)
+  {
+    perror("realpath");
+    return 1;
+  }
+
+  size_t files_size = list_files(path, &files);
   for (int i = 0; i < files_size; i++)
   {
     rename_to_snake_case(&files[i], '\0');
@@ -131,6 +139,11 @@ int main(int argc, char *argv[])
   free(files);
 
   return 0;
+}
+
+void join_paths(char *buffer, const char *path1, const char *path2)
+{
+  snprintf(buffer, PATH_MAX, "%s/%s", path1, path2);
 }
 
 void rename_to_snake_case(char **filename, char find)
@@ -212,7 +225,7 @@ size_t list_files(const char *path, char ***list)
   {
     *list = realloc(*list, sizeof(char *));
     char *name = basename(path);
-    **list = malloc(sizeof(name));
+    **list = malloc(strlen(name));
     strcpy(**list, name);
     return 1;
   }
@@ -227,7 +240,7 @@ size_t list_files(const char *path, char ***list)
       if (dir->d_type == DT_REG)
       {
         *list = realloc(*list, (i + 1) * sizeof(char *));
-        (*list)[i] = malloc(sizeof(dir->d_name));
+        (*list)[i] = malloc(strlen(dir->d_name));
         strcpy((*list)[i], dir->d_name);
         i++;
       }
