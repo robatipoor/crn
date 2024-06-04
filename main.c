@@ -34,6 +34,7 @@ void rename_filename(char *filename, char find, char replace);
 size_t list_files(const char *path, char ***list);
 void print_help_message(void);
 void rename_to_snake_case(char **filename, char find);
+void fs_rename(char *old_filename, char *new_filename);
 
 int main(int argc, char *argv[])
 {
@@ -174,6 +175,19 @@ void rename_to_snake_case(char **filename, char find)
     out[new_length] = '\0';
     free(*filename);
     *filename = out;
+  }
+}
+
+void fs_rename(char *old_filename, char *new_filename)
+{
+
+  if (rename(old_filename, new_filename) == 0)
+  {
+    printf("Entity %s renamed to %s successfully.\n", old_filename, new_filename);
+  }
+  else
+  {
+    perror("Error renaming file");
   }
 }
 
