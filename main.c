@@ -39,104 +39,103 @@ void join_paths(char *buffer, const char *path1, const char *path2);
 
 int main(int argc, char *argv[])
 {
-  // int c;
-  // opterr = 0;
-  // int apply_flag = 0;
-  // enum CaseType case_type = UNKNOWN;
-  // char path[MAX_PATH] = {};
-  // path_state p_state = -1;
-  // char ***files;
-  // char delimiter = '\0';
-  // int d_flag = 0;
+  //   int c;
+  //   opterr = 0;
+  //   int apply_flag = 0;
+  //   enum CaseType case_type = UNKNOWN;
+  //   char path[PATH_MAX] = {};
+  //   path_state p_state = -1;
+  //   char ***files;
+  //   char delimiter = '\0';
+  //   int d_flag = 0;
 
-  // while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
-  //   switch (c)
+  //   while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
+  //     switch (c)
+  //     {
+  //     case 'c':
+  //       if (strstr(optarg, "snake"))
+  //       {
+  //         case_type = SNAKE_CASE;
+  //       }
+  //       else if (strstr(optarg, "kebab"))
+  //       {
+  //         case_type = KEBAB_CASE;
+  //       }
+  //       else if (strstr(optarg, "camel"))
+  //       {
+  //         case_type = CAMEL_CASE;
+  //       }
+  //       else if (strstr(optarg, "pascal"))
+  //       {
+  //         case_type = PASCAL_CASE;
+  //       }
+  //       else
+  //       {
+  //         fprintf(stderr, "Invalid -c argument \n");
+  //         exit(EXIT_FAILURE);
+  //       }
+  //       break;
+  //     case 'd':
+  //       if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0)
+  //       {
+  //         delimiter = optarg[0];
+  //         d_flag = 1;
+  //       }
+  //       else
+  //       {
+  //         fprintf(stderr, "Invalid -d argument \n");
+  //         exit(EXIT_FAILURE);
+  //       }
+  //       break;
+  //     case 'a':
+  //       apply_flag = 1;
+  //       break;
+  //     case 'p':
+  //       if (realpath(optarg, path) == NULL)
+  //       {
+  //         fprintf(stderr, "Invalid file system path: %s\n", path);
+  //         exit(EXIT_FAILURE);
+  //       }
+
+  //       path[strcspn(path, "\n")] = 0;
+  //       p_state = check_path(path);
+  //       if (p_state == -1)
+  //       {
+  //         fprintf(stderr, "Invalid file system path: %s\n", path);
+  //         exit(EXIT_FAILURE);
+  //       }
+
+  //       break;
+  //     case 'h':
+  //       print_help_message();
+  //       exit(EXIT_SUCCESS);
+  //     case 'v':
+  //       printf("0.0.1v \n");
+  //       exit(EXIT_SUCCESS);
+  //     case '?':
+  //       printf("Unknown option: %c\n", optopt);
+  //       print_help_message();
+  //       exit(EXIT_SUCCESS);
+  //     default:
+  //       print_help_message();
+  //       exit(EXIT_FAILURE);
+  //     }
+
+  //   if (path[0] == '\0' || case_type == 0)
   //   {
-  //   case 'c':
-  //     if (strstr(optarg, "snake"))
-  //     {
-  //       case_type = SNAKE_CASE;
-  //     }
-  //     else if (strstr(optarg, "kebab"))
-  //     {
-  //       case_type = KEBAB_CASE;
-  //     }
-  //     else if (strstr(optarg, "camel"))
-  //     {
-  //       case_type = CAMEL_CASE;
-  //     }
-  //     else if (strstr(optarg, "pascal"))
-  //     {
-  //       case_type = PASCAL_CASE;
-  //     }
-  //     else
-  //     {
-  //       fprintf(stderr, "Invalid -c argument \n");
-  //       exit(EXIT_FAILURE);
-  //     }
-  //     break;
-  //   case 'd':
-  //     if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0)
-  //     {
-  //       delimiter = optarg[0];
-  //       d_flag = 1;
-  //     }
-  //     else
-  //     {
-  //       fprintf(stderr, "Invalid -d argument \n");
-  //       exit(EXIT_FAILURE);
-  //     }
-  //     break;
-  //   case 'a':
-  //     apply_flag = 1;
-  //     break;
-  //   case 'p':
-  //     strlcpy(path, optarg, sizeof(path));
-  //     path[strcspn(path, "\n")] = 0;
-  //     p_state = check_path(path);
-  //     if (p_state == -1)
-  //     {
-  //       fprintf(stderr, "Invalid file system path: %s\n", path);
-  //       exit(EXIT_FAILURE);
-  //     }
-  //     break;
-  //   case 'h':
-  //     print_help_message();
-  //     exit(EXIT_SUCCESS);
-  //   case 'v':
-  //     printf("0.0.1v \n");
-  //     exit(EXIT_SUCCESS);
-  //   case '?':
-  //     printf("Unknown option: %c\n", optopt);
-  //     print_help_message();
-  //     exit(EXIT_SUCCESS);
-  //   default:
   //     print_help_message();
   //     exit(EXIT_FAILURE);
   //   }
 
-  // if (path[0] == '\0' || case_type == 0)
+  // char **files = NULL;
+  // size_t files_size = list_files(path, &files);
+  // for (int i = 0; i < files_size; i++)
   // {
-  //   print_help_message();
-  //   exit(EXIT_FAILURE);
+  //   rename_to_snake_case(&files[i], '\0');
+  //   printf("%s \n", files[i]);
+  //   free(files[i]);
   // }
-
-  char **files = NULL;
-  char path[PATH_MAX];
-  if (realpath("~/w/crn/test", path) == NULL)
-  {
-    perror("realpath");
-    return 1;
-  }
-
-  size_t files_size = list_files(path, &files);
-  for (int i = 0; i < files_size; i++)
-  {
-    rename_to_snake_case(&files[i], '\0');
-    printf("%s \n", files[i]);
-    free(files[i]);
-  }
-  free(files);
+  // free(files);
 
   return 0;
 }
