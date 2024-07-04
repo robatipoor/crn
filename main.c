@@ -154,11 +154,6 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-void join_paths(char *buffer, const char *path1, const char *path2)
-{
-  snprintf(buffer, PATH_MAX, "%s/%s", path1, path2);
-}
-
 void rename_to_snake_case(char **filename, char find)
 {
   if (find != '\0')
@@ -247,13 +242,25 @@ size_t list_files(const char *path, char ***list)
   if (d)
   {
     int i = 0;
+    size_t path_len = strlen(path);
     while ((dir = readdir(d)) != NULL)
     {
       if (dir->d_type == DT_REG)
       {
         *list = realloc(*list, (i + 1) * sizeof(char *));
-        (*list)[i] = malloc(strlen(dir->d_name));
-        strcpy((*list)[i], dir->d_name);
+        if (*list == NULL)
+        {
+          perror("Failed to allocate memory");
+          return 0;
+        }
+        size_t size = path_len + strlen(dir->d_name) + 2;
+        (*list)[i] = malloc(size);
+        if ((*list)[i] == NULL)
+        {
+          perror("Failed to allocate memory");
+          return 0;
+        }
+        snprintf((*list)[i], size, "%s/%s", path, dir->d_name);
         i++;
       }
     }
@@ -280,6 +287,11 @@ int check_path(const char *path)
   {
     return -1;
   }
+}
+
+void join_paths(char *buffer, const char *path1, const char *path2)
+{
+  snprintf(buffer, PATH_MAX, "%s/%s", path1, path2);
 }
 
 void print_help_message(void)

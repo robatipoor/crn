@@ -4,6 +4,7 @@
         "chrono": "c",
         "functional": "c",
         "text_encoding": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "format": "c"
     }
 }
