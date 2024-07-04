@@ -143,9 +143,10 @@ int main(int argc, char *argv[])
   }
 
   size_t files_size = list_files(path, &files);
+  printf("OK \n");
   for (int i = 0; i < files_size; i++)
   {
-    rename_to_snake_case(&files[i], '\0');
+    // rename_to_snake_case(&files[i], '\0');
     printf("%s \n", files[i]);
     free(files[i]);
   }
@@ -237,9 +238,8 @@ size_t list_files(const char *path, char ***list)
   if (check_path(path) == 0)
   {
     *list = realloc(*list, sizeof(char *));
-    char *name = basename(path);
-    **list = malloc(strlen(name));
-    strcpy(**list, name);
+    (*list)[0] = (char *)malloc(strlen(path) + 1);
+    strcpy((*list)[0], path);
     return 1;
   }
 

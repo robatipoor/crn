@@ -2,6 +2,8 @@
     "files.associations": {
         "list": "c",
         "chrono": "c",
-        "functional": "c"
+        "functional": "c",
+        "text_encoding": "c",
+        "typeinfo": "c"
     }
 }
