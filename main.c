@@ -143,10 +143,9 @@ int main(int argc, char *argv[])
   }
 
   size_t files_size = list_files(path, &files);
-  printf("OK \n");
   for (int i = 0; i < files_size; i++)
   {
-    // rename_to_snake_case(&files[i], '\0');
+    rename_to_snake_case(&files[i], '\0');
     printf("%s \n", files[i]);
     free(files[i]);
   }
