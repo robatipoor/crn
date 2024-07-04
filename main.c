@@ -15,6 +15,9 @@ static struct option long_options[] =
         {"case", required_argument, NULL, 'c'},
         {"delimiter", required_argument, NULL, 'd'},
         {"apply", no_argument, NULL, 'a'},
+        {"recursive", no_argument, NULL, 'r'},
+        {"file", no_argument, NULL, 'f'},
+        {"subdirectory", no_argument, NULL, 's'},
         {"path", required_argument, NULL, 'p'},
         {"version", no_argument, NULL, 'v'},
         {"help", no_argument, NULL, 'h'},
@@ -39,103 +42,114 @@ void join_paths(char *buffer, const char *path1, const char *path2);
 
 int main(int argc, char *argv[])
 {
-  //   int c;
-  //   opterr = 0;
-  //   int apply_flag = 0;
-  //   enum CaseType case_type = UNKNOWN;
-  //   char path[PATH_MAX] = {};
-  //   path_state p_state = -1;
-  //   char ***files;
-  //   char delimiter = '\0';
-  //   int d_flag = 0;
+  int c;
+  opterr = 0;
+  int apply_flag = 0;
+  int recursive_flag = 0;
+  int file_flag = 0;
+  int subdirectory_flag = 0;
+  enum CaseType case_type = UNKNOWN;
+  char path[PATH_MAX] = {};
+  path_state p_state = -1;
+  char **files = NULL;
+  char delimiter = '\0';
+  int d_flag = 0;
 
-  //   while ((c = getopt_long(argc, argv, "ac:d:p:hv", long_options, NULL)) != -1)
-  //     switch (c)
-  //     {
-  //     case 'c':
-  //       if (strstr(optarg, "snake"))
-  //       {
-  //         case_type = SNAKE_CASE;
-  //       }
-  //       else if (strstr(optarg, "kebab"))
-  //       {
-  //         case_type = KEBAB_CASE;
-  //       }
-  //       else if (strstr(optarg, "camel"))
-  //       {
-  //         case_type = CAMEL_CASE;
-  //       }
-  //       else if (strstr(optarg, "pascal"))
-  //       {
-  //         case_type = PASCAL_CASE;
-  //       }
-  //       else
-  //       {
-  //         fprintf(stderr, "Invalid -c argument \n");
-  //         exit(EXIT_FAILURE);
-  //       }
-  //       break;
-  //     case 'd':
-  //       if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0)
-  //       {
-  //         delimiter = optarg[0];
-  //         d_flag = 1;
-  //       }
-  //       else
-  //       {
-  //         fprintf(stderr, "Invalid -d argument \n");
-  //         exit(EXIT_FAILURE);
-  //       }
-  //       break;
-  //     case 'a':
-  //       apply_flag = 1;
-  //       break;
-  //     case 'p':
-  //       if (realpath(optarg, path) == NULL)
-  //       {
-  //         fprintf(stderr, "Invalid file system path: %s\n", path);
-  //         exit(EXIT_FAILURE);
-  //       }
+  while ((c = getopt_long(argc, argv, "arfsc:d:p:hv", long_options, NULL)) != -1)
+    switch (c)
+    {
+    case 'c':
+      if (strstr(optarg, "snake"))
+      {
+        case_type = SNAKE_CASE;
+      }
+      else if (strstr(optarg, "kebab"))
+      {
+        case_type = KEBAB_CASE;
+      }
+      else if (strstr(optarg, "camel"))
+      {
+        case_type = CAMEL_CASE;
+      }
+      else if (strstr(optarg, "pascal"))
+      {
+        case_type = PASCAL_CASE;
+      }
+      else
+      {
+        fprintf(stderr, "Invalid -c argument \n");
+        exit(EXIT_FAILURE);
+      }
+      break;
+    case 'd':
+      if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0)
+      {
+        delimiter = optarg[0];
+        d_flag = 1;
+      }
+      else
+      {
+        fprintf(stderr, "Invalid -d argument \n");
+        exit(EXIT_FAILURE);
+      }
+      break;
+    case 'a':
+      apply_flag = 1;
+      break;
+    case 'r':
+      recursive_flag = 1;
+      break;
+    case 'f':
+      file_flag = 1;
+      break;
+    case 's':
+      subdirectory_flag = 1;
+      break;
+    case 'p':
+      if (realpath(optarg, path) == NULL)
+      {
+        fprintf(stderr, "Invalid file system path: %s\n", path);
+        exit(EXIT_FAILURE);
+      }
 
-  //       path[strcspn(path, "\n")] = 0;
-  //       p_state = check_path(path);
-  //       if (p_state == -1)
-  //       {
-  //         fprintf(stderr, "Invalid file system path: %s\n", path);
-  //         exit(EXIT_FAILURE);
-  //       }
+      path[strcspn(path, "\n")] = 0;
+      p_state = check_path(path);
+      if (p_state == -1)
+      {
+        fprintf(stderr, "Invalid file system path: %s\n", path);
+        exit(EXIT_FAILURE);
+      }
 
-  //       break;
-  //     case 'h':
-  //       print_help_message();
-  //       exit(EXIT_SUCCESS);
-  //     case 'v':
-  //       printf("0.0.1v \n");
-  //       exit(EXIT_SUCCESS);
-  //     case '?':
-  //       printf("Unknown option: %c\n", optopt);
-  //       print_help_message();
-  //       exit(EXIT_SUCCESS);
-  //     default:
-  //       print_help_message();
-  //       exit(EXIT_FAILURE);
-  //     }
+      break;
+    case 'h':
+      print_help_message();
+      exit(EXIT_SUCCESS);
+    case 'v':
+      printf("0.0.1v \n");
+      exit(EXIT_SUCCESS);
+    case '?':
+      printf("Unknown option: %c\n", optopt);
+      print_help_message();
+      exit(EXIT_SUCCESS);
+    default:
+      print_help_message();
+      exit(EXIT_FAILURE);
+    }
 
-  //   if (path[0] == '\0' || case_type == 0)
-  //   {
-  //     print_help_message();
-  //     exit(EXIT_FAILURE);
-  //   }
+  if (path[0] == '\0' || case_type == 0)
+  {
+    print_help_message();
+    exit(EXIT_FAILURE);
+  }
 
-  // char **files = NULL;
-  // size_t files_size = list_files(path, &files);
-  // for (int i = 0; i < files_size; i++)
-  // {
-  //   rename_to_snake_case(&files[i], '\0');
-  //   printf("%s \n", files[i]);
-  //   free(files[i]);
-  // }
-  // free(files);
+  size_t files_size = list_files(path, &files);
+  for (int i = 0; i < files_size; i++)
+  {
+    rename_to_snake_case(&files[i], '\0');
+    printf("%s \n", files[i]);
+    free(files[i]);
+  }
+  free(files);
 
   return 0;
 }
@@ -273,10 +287,13 @@ void print_help_message(void)
 {
   printf("Usage: crm [options]\n");
   printf("Options:\n");
-  printf("  -a, --apply     Apply file renaming\n");
-  printf("  -c, --case      Choose the case type (snake, camel, kebab, pascal)\n");
-  printf("  -d, --delimiter Choose the word delimiter\n");
-  printf("  -p, --path      Specify the directory or file path\n");
-  printf("  -h, --help      Display this help message\n");
-  printf("  -v, --version   Display version information\n");
+  printf("  -a, --apply        Apply file renaming\n");
+  printf("  -c, --case         Choose the case type (snake, camel, kebab, pascal)\n");
+  printf("  -d, --delimiter    Choose the word delimiter\n");
+  printf("  -p, --path         Specify the directory or file path\n");
+  printf("  -r, --recursive    Recursive \n");
+  printf("  -f, --file         Select files\n");
+  printf("  -s, --subdirectory Select subdirectories\n");
+  printf("  -h, --help         Display this help message\n");
+  printf("  -v, --version      Display version information\n");
 }
