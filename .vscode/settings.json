@@ -5,6 +5,8 @@
         "functional": "c",
         "text_encoding": "c",
         "typeinfo": "c",
-        "format": "c"
+        "format": "c",
+        "string_view": "c",
+        "random": "c"
     }
 }

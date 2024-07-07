@@ -141,7 +141,6 @@ int main(int argc, char *argv[])
     print_help_message();
     exit(EXIT_FAILURE);
   }
-
   size_t files_size = list_files(path, &files);
   for (int i = 0; i < files_size; i++)
   {
@@ -154,48 +153,32 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-void rename_to_snake_case(char **filename, char find)
+void rename_to_snake_case(char **file_path, char find)
 {
-  if (find != '\0')
+  if (find == '\0')
   {
-    for (int i = 0; i < strlen(*filename); i++)
-    {
-      if ((*filename)[i] == find)
-      {
-        (*filename)[i] = '_';
-      }
-    }
-  }
-  else
-  {
-    int length = strlen(*filename);
-    int new_length = length;
-    char *out = (char *)calloc(length + 1, sizeof(char));
-    if (out == NULL)
-    {
-      perror("Failed to allocate memory");
-      return;
-    }
+    char *dup = strdup(*file_path);
+    size_t len = strlen(*file_path);
     int j = 0;
-    for (int i = 0; i < length; i++)
+    size_t count = 0;
+    for (int i = 0; dup[i] != '\0'; i++)
     {
-
-      if (isupper((*filename)[i]) && i != 0)
+      char c = dup[i];
+      if (i != 0 && isupper(c))
       {
-        new_length++;
-        out = realloc(out, new_length);
-        if (out == NULL)
+        count++;
+        *file_path = (char *)realloc(*file_path, len + count + 1);
+        if (*file_path == NULL)
         {
           perror("Failed to allocate memory");
           return;
         }
-        out[j++] = '_';
+        (*file_path)[j++] = '_';
       }
-      out[j++] = tolower((*filename)[i]);
+      (*file_path)[j++] = tolower(c);
     }
-    out[new_length] = '\0';
-    free(*filename);
-    *filename = out;
+    (*file_path)[j] = '\0';
+    free(dup);
   }
 }
 
@@ -254,7 +237,7 @@ size_t list_files(const char *path, char ***list)
           return 0;
         }
         size_t size = path_len + strlen(dir->d_name) + 2;
-        (*list)[i] = malloc(size);
+        (*list)[i] = (char *)malloc(size * sizeof(char));
         if ((*list)[i] == NULL)
         {
           perror("Failed to allocate memory");
