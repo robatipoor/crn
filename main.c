@@ -1,30 +1,30 @@
 #define _GNU_SOURCE
+#include <ctype.h>
 #include <dirent.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <ctype.h>
-#include <getopt.h>
 
 typedef int path_state;
 
-static struct option long_options[] =
-    {
-        {"case", required_argument, NULL, 'c'},
-        {"delimiter", required_argument, NULL, 'd'},
-        {"apply", no_argument, NULL, 'a'},
-        {"recursive", no_argument, NULL, 'r'},
-        {"file", no_argument, NULL, 'f'},
-        {"subdirectory", no_argument, NULL, 's'},
-        {"path", required_argument, NULL, 'p'},
-        {"version", no_argument, NULL, 'v'},
-        {"help", no_argument, NULL, 'h'},
-        {NULL, 0, NULL, 0}};
+const char PATH_SEPARATOR = '/';
 
-enum CaseType
-{
+static struct option long_options[] = {
+    {"case", required_argument, NULL, 'c'},
+    {"delimiter", required_argument, NULL, 'd'},
+    {"apply", no_argument, NULL, 'a'},
+    {"recursive", no_argument, NULL, 'r'},
+    {"file", no_argument, NULL, 'f'},
+    {"subdirectory", no_argument, NULL, 's'},
+    {"path", required_argument, NULL, 'p'},
+    {"version", no_argument, NULL, 'v'},
+    {"help", no_argument, NULL, 'h'},
+    {NULL, 0, NULL, 0}};
+
+enum CaseType {
   UNKNOWN,
   SNAKE_CASE,
   CAMEL_CASE,
@@ -40,8 +40,7 @@ void rename_to_snake_case(char **filename, char find);
 void fs_rename(char *old_filename, char *new_filename);
 void join_paths(char *buffer, const char *path1, const char *path2);
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   int c;
   opterr = 0;
   int apply_flag = 0;
@@ -55,40 +54,28 @@ int main(int argc, char *argv[])
   char delimiter = '\0';
   int d_flag = 0;
 
-  while ((c = getopt_long(argc, argv, "arfsc:d:p:hv", long_options, NULL)) != -1)
-    switch (c)
-    {
+  while ((c = getopt_long(argc, argv, "arfsc:d:p:hv", long_options, NULL)) !=
+         -1)
+    switch (c) {
     case 'c':
-      if (strstr(optarg, "snake"))
-      {
+      if (strstr(optarg, "snake")) {
         case_type = SNAKE_CASE;
-      }
-      else if (strstr(optarg, "kebab"))
-      {
+      } else if (strstr(optarg, "kebab")) {
         case_type = KEBAB_CASE;
-      }
-      else if (strstr(optarg, "camel"))
-      {
+      } else if (strstr(optarg, "camel")) {
         case_type = CAMEL_CASE;
-      }
-      else if (strstr(optarg, "pascal"))
-      {
+      } else if (strstr(optarg, "pascal")) {
         case_type = PASCAL_CASE;
-      }
-      else
-      {
+      } else {
         fprintf(stderr, "Invalid -c argument \n");
         exit(EXIT_FAILURE);
       }
       break;
     case 'd':
-      if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0)
-      {
+      if (strlen(optarg) == 1 && optarg[0] < 127 && optarg[0] >= 0) {
         delimiter = optarg[0];
         d_flag = 1;
-      }
-      else
-      {
+      } else {
         fprintf(stderr, "Invalid -d argument \n");
         exit(EXIT_FAILURE);
       }
@@ -106,16 +93,14 @@ int main(int argc, char *argv[])
       subdirectory_flag = 1;
       break;
     case 'p':
-      if (realpath(optarg, path) == NULL)
-      {
+      if (realpath(optarg, path) == NULL) {
         fprintf(stderr, "Invalid file system path: %s\n", path);
         exit(EXIT_FAILURE);
       }
 
       path[strcspn(path, "\n")] = 0;
       p_state = check_path(path);
-      if (p_state == -1)
-      {
+      if (p_state == -1) {
         fprintf(stderr, "Invalid file system path: %s\n", path);
         exit(EXIT_FAILURE);
       }
@@ -136,14 +121,12 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
-  if (path[0] == '\0' || case_type == 0)
-  {
+  if (path[0] == '\0' || case_type == 0) {
     print_help_message();
     exit(EXIT_FAILURE);
   }
   size_t files_size = list_files(path, &files);
-  for (int i = 0; i < files_size; i++)
-  {
+  for (int i = 0; i < files_size; i++) {
     rename_to_snake_case(&files[i], '\0');
     printf("%s \n", files[i]);
     free(files[i]);
@@ -153,23 +136,18 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-void rename_to_snake_case(char **file_path, char find)
-{
-  if (find == '\0')
-  {
+void rename_to_snake_case(char **file_path, char find) {
+  if (find == '\0') {
     char *dup = strdup(*file_path);
     size_t len = strlen(*file_path);
     int j = 0;
     size_t count = 0;
-    for (int i = 0; dup[i] != '\0'; i++)
-    {
+    for (int i = 0; dup[i] != '\0'; i++) {
       char c = dup[i];
-      if (i != 0 && isupper(c))
-      {
+      if (i != 0 && isupper(c) && dup[i - 1] != PATH_SEPARATOR) {
         count++;
         *file_path = (char *)realloc(*file_path, len + count + 1);
-        if (*file_path == NULL)
-        {
+        if (*file_path == NULL) {
           perror("Failed to allocate memory");
           return;
         }
@@ -182,26 +160,21 @@ void rename_to_snake_case(char **file_path, char find)
   }
 }
 
-void fs_rename(char *old_filename, char *new_filename)
-{
+void fs_rename(char *old_filename, char *new_filename) {
 
-  if (rename(old_filename, new_filename) == 0)
-  {
-    printf("Entity %s renamed to %s successfully.\n", old_filename, new_filename);
-  }
-  else
-  {
+  if (rename(old_filename, new_filename) == 0) {
+    printf("Entity %s renamed to %s successfully.\n", old_filename,
+           new_filename);
+  } else {
     perror("Error renaming file");
   }
 }
 
-void rename_filename(char *filename, char find, char replace)
-{
+void rename_filename(char *filename, char find, char replace) {
 
   char *current_pos = strchr(filename, find);
 
-  while (current_pos)
-  {
+  while (current_pos) {
     *current_pos = replace;
     current_pos = strchr(current_pos + 1, find);
   }
@@ -209,11 +182,9 @@ void rename_filename(char *filename, char find, char replace)
   return;
 }
 
-size_t list_files(const char *path, char ***list)
-{
+size_t list_files(const char *path, char ***list) {
 
-  if (check_path(path) == 0)
-  {
+  if (check_path(path) == 0) {
     *list = realloc(*list, sizeof(char *));
     (*list)[0] = (char *)malloc(strlen(path) + 1);
     strcpy((*list)[0], path);
@@ -222,24 +193,19 @@ size_t list_files(const char *path, char ***list)
 
   struct dirent *dir;
   DIR *d = opendir(path);
-  if (d)
-  {
+  if (d) {
     int i = 0;
     size_t path_len = strlen(path);
-    while ((dir = readdir(d)) != NULL)
-    {
-      if (dir->d_type == DT_REG)
-      {
+    while ((dir = readdir(d)) != NULL) {
+      if (dir->d_type == DT_REG) {
         *list = realloc(*list, (i + 1) * sizeof(char *));
-        if (*list == NULL)
-        {
+        if (*list == NULL) {
           perror("Failed to allocate memory");
           return 0;
         }
         size_t size = path_len + strlen(dir->d_name) + 2;
         (*list)[i] = (char *)malloc(size * sizeof(char));
-        if ((*list)[i] == NULL)
-        {
+        if ((*list)[i] == NULL) {
           perror("Failed to allocate memory");
           return 0;
         }
@@ -254,35 +220,28 @@ size_t list_files(const char *path, char ***list)
   return 0;
 }
 
-int check_path(const char *path)
-{
+int check_path(const char *path) {
   struct stat path_stat;
   stat(path, &path_stat);
-  if (S_ISREG(path_stat.st_mode))
-  {
+  if (S_ISREG(path_stat.st_mode)) {
     return 0;
-  }
-  else if (S_ISDIR(path_stat.st_mode))
-  {
+  } else if (S_ISDIR(path_stat.st_mode)) {
     return 1;
-  }
-  else
-  {
+  } else {
     return -1;
   }
 }
 
-void join_paths(char *buffer, const char *path1, const char *path2)
-{
+void join_paths(char *buffer, const char *path1, const char *path2) {
   snprintf(buffer, PATH_MAX, "%s/%s", path1, path2);
 }
 
-void print_help_message(void)
-{
+void print_help_message(void) {
   printf("Usage: crm [options]\n");
   printf("Options:\n");
   printf("  -a, --apply        Apply file renaming\n");
-  printf("  -c, --case         Choose the case type (snake, camel, kebab, pascal)\n");
+  printf("  -c, --case         Choose the case type (snake, camel, kebab, "
+         "pascal)\n");
   printf("  -d, --delimiter    Choose the word delimiter\n");
   printf("  -p, --path         Specify the directory or file path\n");
   printf("  -r, --recursive    Recursive \n");
