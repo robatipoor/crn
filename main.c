@@ -36,7 +36,7 @@ path_state check_path(const char *path);
 void rename_filename(char *filename, char find, char replace);
 size_t list_files(const char *path, char ***list);
 void print_help_message(void);
-void rename_to_snake_case(char **filename, char find);
+void rename_appender(char **filename, char find, char replace);
 void fs_rename(char *old_filename, char *new_filename);
 void join_paths(char *buffer, const char *path1, const char *path2);
 
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
   }
   size_t files_size = list_files(path, &files);
   for (int i = 0; i < files_size; i++) {
-    rename_to_snake_case(&files[i], '\0');
+    rename_appender(&files[i], '\0', '-');
     printf("%s \n", files[i]);
     free(files[i]);
   }
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void rename_to_snake_case(char **file_path, char find) {
+void rename_appender(char **file_path, char find, char replace) {
   if (find == '\0') {
     char *dup = strdup(*file_path);
     size_t len = strlen(*file_path);
@@ -151,12 +151,21 @@ void rename_to_snake_case(char **file_path, char find) {
           perror("Failed to allocate memory");
           return;
         }
-        (*file_path)[j++] = '_';
+        (*file_path)[j++] = replace;
       }
       (*file_path)[j++] = tolower(c);
     }
     (*file_path)[j] = '\0';
     free(dup);
+  } else {
+    for (int i = 0; (*file_path)[i] != '\0'; i++) {
+      char c = (*file_path)[i];
+      if (c == find) {
+        (*file_path)[i] = replace;
+      } else {
+        (*file_path)[i] = tolower(c);
+      }
+    }
   }
 }
 
