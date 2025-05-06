@@ -7,6 +7,12 @@
         "typeinfo": "c",
         "format": "c",
         "string_view": "c",
-        "random": "c"
+        "random": "c",
+        "unity.h": "c",
+        "utils.h": "c",
+        "getopt.h": "c",
+        "stdio.h": "c",
+        "dirent.h": "c",
+        "ratio": "c"
     }
 }

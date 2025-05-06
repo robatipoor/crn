@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "utils.h"
 
 typedef int path_state;
 
@@ -38,7 +39,6 @@ size_t list_files(const char *path, char ***list);
 void print_help_message(void);
 void rename_appender(char **filename, char find, char replace);
 void fs_rename(char *old_filename, char *new_filename);
-void join_paths(char *buffer, const char *path1, const char *path2);
 
 int main(int argc, char *argv[]) {
   int c;
@@ -136,9 +136,43 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
+// First Name
+// first name
+// FirstName
+// first-Name
+
+void rename_camel_case(char **file_path, char find) {
+  char *dup = strdup(*file_path);
+  if (!dup) {
+    perror("Failed to allocate memory");
+    return;
+  }
+  int is_previous_find = 0;
+  int j = 0;
+  for (int i = 0; dup[i] != '\0'; i++) {
+    char c = dup[i];
+    if (c == find) {
+      is_previous_find = 1;
+    } else {
+      if (is_previous_find == 1) {
+        (*file_path)[j++] = toupper(c);
+        is_previous_find = 0;
+      } else {
+        (*file_path)[j++] = tolower(c);
+      }
+    }
+  }
+  (*file_path)[j] = '\0';
+  free(dup);
+}
+
 void rename_appender(char **file_path, char find, char replace) {
   if (find == '\0') {
     char *dup = strdup(*file_path);
+    if (!dup) {
+      perror("Failed to allocate memory");
+      return;
+    }
     size_t len = strlen(*file_path);
     int j = 0;
     size_t count = 0;
@@ -239,10 +273,6 @@ int check_path(const char *path) {
   } else {
     return -1;
   }
-}
-
-void join_paths(char *buffer, const char *path1, const char *path2) {
-  snprintf(buffer, PATH_MAX, "%s/%s", path1, path2);
 }
 
 void print_help_message(void) {
